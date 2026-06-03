@@ -1,0 +1,71 @@
+{% load static %}
+
+<div class="sidebar">
+
+    <div class="sidebar-header">
+
+        <div class="sidebar-logo">
+            Help Desk
+        </div>
+
+        <small class="sidebar-subtitle">
+            Gestão de Chamados
+        </small>
+
+    </div>
+
+    <div class="sidebar-menu">
+
+        <ul class="nav flex-column">
+
+            <li class="nav-item">
+                <a class="nav-link"
+                   href="{% url 'dashboard' %}">
+                    📊 Dashboard
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link"
+                   href="{% url 'ticket-list' %}">
+                    🎫 Chamados
+                </a>
+            </li>
+
+        </ul>
+
+    </div>
+
+    <div class="sidebar-footer">
+
+        <div class="user-info">
+
+            <div class="user-name">
+                {{ request.user.username }}
+            </div>
+
+            <div class="user-role">
+                Usuário
+            </div>
+
+        </div>
+
+        <form method="post"
+            action="{% url 'logout' %}"
+            class="mt-3">
+
+            {% csrf_token %}
+
+            <button
+                type="submit"
+                class="btn btn-outline-light logout-btn">
+
+                Sair
+
+            </button>
+
+        </form>
+
+    </div>
+
+</div>

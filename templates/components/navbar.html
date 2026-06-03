@@ -1,0 +1,21 @@
+<nav class="navbar navbar-dark bg-dark">
+
+    <div class="container-fluid">
+
+        <span class="navbar-brand">
+            Help Desk
+        </span>
+
+        {% if user.is_authenticated %}
+
+        <span class="text-white">
+
+            {{ user.username }}
+
+        </span>
+
+        {% endif %}
+
+    </div>
+
+</nav>

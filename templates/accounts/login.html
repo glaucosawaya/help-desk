@@ -1,0 +1,62 @@
+{% extends 'layouts/auth.html' %}
+
+{% block title %}
+Login
+{% endblock %}
+
+{% block content %}
+
+<div class="card login-card">
+
+    <div class="card-body p-5">
+
+        <div class="text-center mb-4">
+
+            <div class="login-logo">
+                Help Desk
+            </div>
+
+            <div class="login-subtitle">
+                Central de Atendimento
+            </div>
+
+        </div>
+
+        <form method="post">
+
+            {% csrf_token %}
+
+            <div class="mb-3">
+
+                <label class="form-label">
+                    Usuário
+                </label>
+
+                {{ form.username }}
+
+            </div>
+
+            <div class="mb-4">
+
+                <label class="form-label">
+                    Senha
+                </label>
+
+                {{ form.password }}
+
+            </div>
+
+            <button type="submit"
+                    class="btn btn-primary btn-login w-100">
+
+                Entrar
+
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+{% endblock %}
