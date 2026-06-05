@@ -98,3 +98,64 @@ class Ticket(models.Model):
 
     def __str__(self):
         return self.title
+    
+class TicketHistory(models.Model):
+
+    ticket = models.ForeignKey(
+        Ticket,
+        on_delete=models.CASCADE,
+        related_name="history"
+    )
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True
+    )
+
+    action = models.CharField(
+        max_length=255
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    class Meta:
+
+        ordering = [
+            "-created_at"
+        ]
+
+    def __str__(self):
+
+        return self.action    
+
+class TicketComment(models.Model):
+
+    ticket = models.ForeignKey(
+        Ticket,
+        on_delete=models.CASCADE,
+        related_name="comments"
+    )
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE
+    )
+
+    comment = models.TextField()
+
+    created_at = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    class Meta:
+
+        ordering = [
+            "-created_at"
+        ]
+
+    def __str__(self):
+
+        return f"{self.user} - {self.ticket.codigo}"

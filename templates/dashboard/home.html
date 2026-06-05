@@ -12,19 +12,19 @@ Dashboard
 
 <div class="row g-4">
 
-    <div class="col-md-3">
+    <div class="col-md">
 
-        <div class="card">
+        <div class="card shadow-sm stats-card">
 
             <div class="card-body">
 
-                <h1>
+                <div class="stats-number">
                     {{ total_tickets }}
-                </h1>
+                </div>
 
-                <p>
+                <div class="stats-label">
                     Total de Chamados
-                </p>
+                </div>
 
             </div>
 
@@ -32,83 +32,197 @@ Dashboard
 
     </div>
 
-    <div class="col-md-3">
+    <div class="col-md">
 
-        <div class="card">
+        <div class="card shadow-sm stats-card">
 
             <div class="card-body">
 
-                <h1>
+                <div class="stats-number">
                     {{ open_tickets }}
-                </h1>
-
-                <p>
+                </div>
+                
+                <div class="stats-label">
                     Abertos
-                </p>
-
+                </div>
+                                    
             </div>
 
         </div>
 
     </div>
 
-    <div class="col-md-3">
+    <div class="col-md">
 
-        <div class="card">
+        <div class="card shadow-sm stats-card">
 
             <div class="card-body">
 
-                <h1>
+                <div class="stats-number">
                     {{ analysis_tickets }}
-                </h1>
-
-                <p>
+                </div>
+                
+                <div class="stats-label">
                     Em Análise
-                </p>
-
+                </div>
+                                
             </div>
 
         </div>
 
     </div>
 
-    <div class="col-md-3">
+    <div class="col-md">
 
-        <div class="card">
+        <div class="card shadow-sm stats-card">
+
+            <div class="card-body">
+               
+                <div class="stats-number">
+                    {{ resolved_tickets }}
+                </div>
+                
+                <div class="stats-label">
+                    Resolvidos
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="col-md">
+
+        <div class="card shadow-sm stats-card border-danger">
 
             <div class="card-body">
 
-                <h1>
-                    {{ resolved_tickets }}
-                </h1>
+                <div class="stats-number text-danger">
+                    {{ critical_tickets }}
+                </div>
 
-                <p>
-                    Resolvidos
-                </p>
+                <div class="stats-label">
+                    Críticos
+                </div>
 
             </div>
 
         </div>
 
     </div>
+
+
+
+
 
 </div>
 
 <div class="row mt-4">
 
-    <div class="col-md-3">
+    <div class="col-lg-6">
 
-        <div class="card border-danger">
+        <div class="card shadow-sm">
+
+            <div class="card-header">
+
+                Últimos Chamados
+
+            </div>
 
             <div class="card-body">
 
-                <h1>
-                    {{ critical_tickets }}
-                </h1>
+                {% for ticket in ultimos_chamados %}
 
-                <p>
-                    Críticos
-                </p>
+                    <div class="dashboard-item">
+
+                        <div>
+
+                            <strong>
+
+                                <span class="badge bg-secondary">
+                                    {{ ticket.codigo }}
+                                </span>
+                                <a
+                                    href="{% url 'ticket-detail' ticket.id %}"
+                                    class="text-decoration-none">
+
+                                    {{ ticket.title }}
+
+                                </a>
+                            </strong>
+                            
+
+                        </div>
+
+                        <div>
+
+                            {{ ticket.title }}
+
+                        </div>
+
+                        <small class="text-muted">
+
+                            {{ ticket.created_at|date:"d/m/Y H:i" }}
+
+                        </small>
+
+                    </div>
+
+                {% empty %}
+
+                    <p>
+
+                        Nenhum chamado encontrado.
+
+                    </p>
+
+                {% endfor %}
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="col-lg-6">
+
+        <div class="card shadow-sm">
+
+            <div class="card-header">
+
+                Últimas Movimentações
+
+            </div>
+
+            <div class="card-body">
+
+                {% for item in ultimas_movimentacoes %}
+
+    <div class="dashboard-item">
+
+        <div>
+
+            <strong>
+                {{ item.user }}
+            </strong>
+
+        </div>
+
+        <div>
+            {{ item.action }}
+        </div>
+
+        <div class="small text-muted">
+            {{ item.ticket.codigo }}
+        </div>
+
+        <div class="small text-muted">
+            {{ item.created_at|date:"d/m/Y H:i" }}
+        </div>
+
+    </div>
+
+{% endfor %}
 
             </div>
 

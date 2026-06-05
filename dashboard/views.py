@@ -1,7 +1,10 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import TemplateView
 
-from tickets.models import Ticket
+from tickets.models import (
+    Ticket,
+    TicketHistory,
+)
 
 
 class DashboardView(
@@ -32,5 +35,22 @@ class DashboardView(
         context["critical_tickets"] = Ticket.objects.filter(
             priority=Ticket.Priority.CRITICAL
         ).count()
+        
+        context["ultimos_chamados"] = (Ticket.objects
+            .select_related(
+                "requester",
+                "assigned_to"
+            )
+            .order_by("-created_at")[:5]
+        )
+
+        context["ultimas_movimentacoes"] = (
+            TicketHistory.objects
+            .select_related(
+                "ticket",
+                "user"
+            )
+            .order_by("-created_at")[:10]
+        )
 
         return context

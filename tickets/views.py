@@ -5,11 +5,19 @@ from django.views.generic import (
     ListView,
 )
 
-from .models import Ticket
-from .forms import TicketForm
+from .models import (
+    Ticket,
+    TicketHistory,
+    TicketComment,
+)
+from .forms import (
+    TicketForm,
+    TicketCommentForm,
+)
 from django.views.generic import DetailView
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, get_object_or_404
+from django.db.models import Count
 
 
 class TicketDetailView(
@@ -22,6 +30,19 @@ class TicketDetailView(
     template_name = "tickets/detail.html"
 
     context_object_name = "ticket"
+
+    def get_context_data(self, **kwargs):
+
+        context = super().get_context_data(
+            **kwargs
+        )
+
+        context["comment_form"] = (
+            TicketCommentForm()
+        )
+
+        return context
+
 
 class TicketCreateView(
     LoginRequiredMixin,
@@ -44,7 +65,17 @@ class TicketCreateView(
             self.request.user
         )
 
-        return super().form_valid(form)
+        response = super().form_valid(
+            form
+        )
+
+        TicketHistory.objects.create(
+            ticket=self.object,
+            user=self.request.user,
+            action="Chamado criado"
+        )
+
+        return response
 
 
 class TicketListView(
@@ -58,7 +89,51 @@ class TicketListView(
 
     context_object_name = "tickets"
 
-    ordering = ["-created_at"]
+    queryset = (
+        Ticket.objects
+        .select_related(
+            "requester",
+            "assigned_to"
+        )
+        .order_by("-created_at")
+    )
+
+    def get_context_data(self, **kwargs):
+
+        context = super().get_context_data(
+            **kwargs
+        )
+
+        context["total_tickets"] = (
+            Ticket.objects.count()
+        )
+
+        context["open_count"] = (
+            Ticket.objects.filter(
+                status="OPEN"
+            ).count()
+        )
+
+        context["analysis_count"] = (
+            Ticket.objects.filter(
+                status="ANALYSIS"
+            ).count()
+        )
+
+        context["development_count"] = (
+            Ticket.objects.filter(
+                status="DEVELOPMENT"
+            ).count()
+        )
+
+        context["resolved_count"] = (
+            Ticket.objects.filter(
+                status="RESOLVED"
+            ).count()
+        )
+
+        return context
+
 
 @login_required
 def assumir_chamado(request, pk):
@@ -76,11 +151,18 @@ def assumir_chamado(request, pk):
         ticket.assigned_to = request.user
         ticket.save()
 
+        TicketHistory.objects.create(
+            ticket=ticket,
+            user=request.user,
+            action="Chamado assumido"
+        )
+
     return redirect(
         "ticket-detail",
         pk=ticket.pk
-    )    
-    
+    )
+
+
 @login_required
 def alterar_status(request, pk):
 
@@ -108,7 +190,50 @@ def alterar_status(request, pk):
 
         ticket.save()
 
+        TicketHistory.objects.create(
+            ticket=ticket,
+            user=request.user,
+            action=f"Status alterado para {ticket.get_status_display()}"
+        )
+
     return redirect(
         "ticket-detail",
         pk=pk
-    )    
+    )
+
+
+@login_required
+def adicionar_comentario(
+    request,
+    pk
+):
+
+    ticket = get_object_or_404(
+        Ticket,
+        pk=pk
+    )
+
+    if request.method == "POST":
+
+        comentario = request.POST.get(
+            "comment"
+        )
+
+        if comentario:
+
+            TicketComment.objects.create(
+                ticket=ticket,
+                user=request.user,
+                comment=comentario
+            )
+
+            TicketHistory.objects.create(
+                ticket=ticket,
+                user=request.user,
+                action="Comentário adicionado"
+            )
+
+    return redirect(
+        "ticket-detail",
+        pk=pk
+    )

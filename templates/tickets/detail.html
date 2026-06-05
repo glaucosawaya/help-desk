@@ -6,142 +6,221 @@ Chamado #{{ ticket.id }}
 
 {% block content %}
 
-<div class="card">
+<div class="row">
 
-    <div class="card-header">
+    <div class="col-lg-8">
 
-        <h3>
-            {{ ticket.codigo }}
-        </h3>
+        <div class="card shadow-sm mb-4">
+
+            <div class="card-header">
+
+                <h4 class="mb-0">
+                    {{ ticket.codigo }}
+                </h4>
+
+            </div>
+
+            <div class="card-body">
+
+                <div class="mb-3">
+                    <strong>Título</strong>
+                    <div>{{ ticket.title }}</div>
+                </div>
+
+                <div class="mb-3">
+                    <strong>Sistema</strong>
+                    <div>{{ ticket.system_name }}</div>
+                </div>
+
+                <div class="mb-3">
+                    <strong>Descrição</strong>
+                    <div>{{ ticket.description }}</div>
+                </div>
+
+                <div class="mb-3">
+                    <strong>Mensagem Técnica</strong>
+                    <div>{{ ticket.error_message }}</div>
+                </div>
+
+            </div>
+
+        </div>
 
     </div>
 
-    <div class="card-body">
-            {% if request.user.role == "ADMIN" or request.user.role == "TECNICO" %}
+    <div class="col-lg-4">
 
-        {% if not ticket.assigned_to %}
+        <!-- Card Status -->
 
-            <a
-                href="{% url 'ticket-assume' ticket.id %}"
-                class="btn btn-primary mb-4">
+        <div class="card shadow-sm mb-3">
 
-                Assumir Chamado
+            <div class="card-header">
+                Informações
+            </div>
 
-            </a>
+            <div class="card-body">
 
-        {% endif %}
+                <div class="mb-3">
 
-    {% endif %}
+                    <strong>Status</strong>
 
-        <div class="mb-3">
-            <strong>Título:</strong>
-            {{ ticket.title }}
+                    <div>
+
+                        <span class="badge-status status-{{ ticket.status|lower }}">
+
+                            {{ ticket.get_status_display }}
+
+                        </span>
+
+                    </div>
+
+                </div>
+
+                <div class="mb-3">
+
+                    <strong>Prioridade</strong>
+
+                    <div>
+
+                        <span class="badge-status priority-{{ ticket.priority|lower }}">
+
+                            {{ ticket.get_priority_display }}
+
+                        </span>
+
+                    </div>
+
+                </div>
+
+                <div class="mb-3">
+
+                    <strong>Categoria</strong>
+
+                    <div>
+                        {{ ticket.get_category_display }}
+                    </div>
+
+                </div>
+
+                <div class="mb-3">
+
+                    <strong>Solicitante</strong>
+
+                    <div>
+                        {{ ticket.requester }}
+                    </div>
+
+                </div>
+
+                <div class="mb-3">
+
+                    <strong>Responsável</strong>
+
+                    <div>
+
+                        {% if ticket.assigned_to %}
+                        {{ ticket.assigned_to }}
+                        {% else %}
+                        Não atribuído
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+            </div>
+
         </div>
 
-        <div class="mb-3">
-            <strong>Sistema:</strong>
-            {{ ticket.system_name }}
-        </div>
+        <!-- Histórico -->
 
-        <div class="mb-3">
-            <strong>Categoria:</strong>
-            {{ ticket.get_category_display }}
-        </div>
+        <div class="card shadow-sm">
 
-        <div class="mb-3">
-            <strong>Prioridade:</strong>
-            {{ ticket.get_priority_display }}
-        </div>
+            <div class="card-header">
+                Histórico
+            </div>
 
-        <div class="mb-4">
+            <div class="card-body">
 
-            <strong>Status:</strong>
+                {% for item in ticket.history.all %}
 
-            {{ ticket.get_status_display }}
+                <div class="border-bottom pb-2 mb-2">
 
-        </div>
-                {% if request.user.role == "ADMIN" or request.user.role == "TECNICO" %}
+                    <div>
+                        <strong>{{ item.user }}</strong>
+                    </div>
 
-        <form
-            method="post"
-            action="{% url 'ticket-change-status' ticket.id %}"
-            class="mb-4">
+                    <div class="small text-muted">
+                        {{ item.created_at|date:"d/m/Y H:i" }}
+                    </div>
 
-            {% csrf_token %}
+                    <div>
+                        {{ item.action }}
+                    </div>
 
-            <label class="form-label">
-
-                Alterar Status
-
-            </label>
-
-            <select
-                name="status"
-                class="form-select">
-
-                {% for value,label in ticket.Status.choices %}
-
-                    <option
-                        value="{{ value }}"
-                        {% if value == ticket.status %}
-                        selected
-                        {% endif %}>
-
-                        {{ label }}
-
-                    </option>
+                </div>
 
                 {% endfor %}
 
-            </select>
+            </div>
 
-            <button
-                type="submit"
-                class="btn btn-primary mt-2">
+        </div>
 
-                Salvar
 
-            </button>
+        <!-- Comentários -->
 
-        </form>
+        <div class="card shadow-sm mt-3">
 
-        {% endif %}
+            <div class="card-header">
+                Comentários
+            </div>
 
-        <div class="mb-3">
-            <strong>Solicitante:</strong>
-            {{ ticket.requester }}
-            <div class="mb-3">
+            <div class="card-body">
 
-                <strong>Responsável:</strong>
+                <form method="post" action="{% url 'ticket-comment' ticket.id %}">
 
-                {% if ticket.assigned_to %}
+                    {% csrf_token %}
 
-                    {{ ticket.assigned_to }}
+                    {{ comment_form }}
 
-                {% else %}
+                    <button type="submit" class="btn btn-primary mt-3">
 
-                    Não atribuído
+                        Adicionar Comentário
 
-                {% endif %}
+                    </button>
+
+                </form>
+
+                <hr>
+
+                {% for comment in ticket.comments.all %}
+
+                <div class="mb-3">
+
+                    <strong>
+                        {{ comment.user }}
+                    </strong>
+
+                    <div class="small text-muted">
+                        {{ comment.created_at|date:"d/m/Y H:i" }}
+                    </div>
+
+                    <div>
+                        {{ comment.comment }}
+                    </div>
+
+                </div>
+
+                {% empty %}
+
+                <p>
+                    Nenhum comentário.
+                </p>
+
+                {% endfor %}
 
             </div>
-        </div>
 
-        <div class="mb-3">
-            <strong>Descrição:</strong>
-            <br>
-            {{ ticket.description }}
-        </div>
-
-        <div class="mb-3">
-            <strong>Mensagem Técnica:</strong>
-            <br>
-            {{ ticket.error_message }}
-        </div>
-
-        <div class="mb-3">
-            <strong>Criado em:</strong>
-            {{ ticket.created_at|date:"d/m/Y H:i" }}
         </div>
 
     </div>

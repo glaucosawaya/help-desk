@@ -6,6 +6,7 @@ from .views import (
     TicketDetailView,
     alterar_status,
     assumir_chamado,
+    adicionar_comentario,
 )
 
 
@@ -38,4 +39,9 @@ urlpatterns = [
         assumir_chamado,
         name="ticket-assume"
     ),
+    path(
+    "<int:pk>/comentario/",
+    adicionar_comentario,
+    name="ticket-comment"
+),
 ]

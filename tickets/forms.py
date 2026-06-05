@@ -1,5 +1,6 @@
 from django import forms
 from .models import Ticket
+from .models import TicketComment
 
 
 class TicketForm(forms.ModelForm):
@@ -80,3 +81,27 @@ class TicketStatusForm(forms.ModelForm):
         fields = [
             "status"
         ]
+
+class TicketCommentForm(forms.ModelForm):
+
+    class Meta:
+
+        model = TicketComment
+
+        fields = [
+            "comment"
+        ]
+
+        labels = {
+            "comment": "Comentário"
+        }
+
+        widgets = {
+            "comment": forms.Textarea(
+                attrs={
+                    "rows": 4,
+                    "class": "form-control",
+                    "placeholder": "Digite uma observação..."
+                }
+            )
+        }        
