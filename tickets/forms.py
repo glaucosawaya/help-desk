@@ -70,3 +70,13 @@ class TicketForm(forms.ModelForm):
                 }
             ),
         }
+
+class TicketStatusForm(forms.ModelForm):
+
+    class Meta:
+
+        model = Ticket
+
+        fields = [
+            "status"
+        ]

@@ -8,6 +8,8 @@ from django.views.generic import (
 from .models import Ticket
 from .forms import TicketForm
 from django.views.generic import DetailView
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import redirect, get_object_or_404
 
 
 class TicketDetailView(
@@ -58,24 +60,55 @@ class TicketListView(
 
     ordering = ["-created_at"]
 
-    from django.shortcuts import get_object_or_404, redirect
+@login_required
+def assumir_chamado(request, pk):
 
-    def assumir_chamado(request, pk):
+    ticket = get_object_or_404(
+        Ticket,
+        pk=pk
+    )
 
-        ticket = get_object_or_404(
-            Ticket,
+    if request.user.role in [
+        "ADMIN",
+        "TECNICO"
+    ]:
+
+        ticket.assigned_to = request.user
+        ticket.save()
+
+    return redirect(
+        "ticket-detail",
+        pk=ticket.pk
+    )    
+    
+@login_required
+def alterar_status(request, pk):
+
+    ticket = get_object_or_404(
+        Ticket,
+        pk=pk
+    )
+
+    if request.user.role not in [
+        "ADMIN",
+        "TECNICO"
+    ]:
+        return redirect(
+            "ticket-detail",
             pk=pk
         )
 
-        if request.user.role in [
-            "ADMIN",
-            "TECNICO"
-        ]:
+    if request.method == "POST":
 
-            ticket.assigned_to = request.user
-            ticket.save()
-
-        return redirect(
-            "ticket-detail",
-            pk=ticket.pk
+        novo_status = request.POST.get(
+            "status"
         )
+
+        ticket.status = novo_status
+
+        ticket.save()
+
+    return redirect(
+        "ticket-detail",
+        pk=pk
+    )    

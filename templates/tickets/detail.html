@@ -11,7 +11,7 @@ Chamado #{{ ticket.id }}
     <div class="card-header">
 
         <h3>
-            Chamado #{{ ticket.id }}
+            {{ ticket.codigo }}
         </h3>
 
     </div>
@@ -53,10 +53,59 @@ Chamado #{{ ticket.id }}
             {{ ticket.get_priority_display }}
         </div>
 
-        <div class="mb-3">
+        <div class="mb-4">
+
             <strong>Status:</strong>
+
             {{ ticket.get_status_display }}
+
         </div>
+                {% if request.user.role == "ADMIN" or request.user.role == "TECNICO" %}
+
+        <form
+            method="post"
+            action="{% url 'ticket-change-status' ticket.id %}"
+            class="mb-4">
+
+            {% csrf_token %}
+
+            <label class="form-label">
+
+                Alterar Status
+
+            </label>
+
+            <select
+                name="status"
+                class="form-select">
+
+                {% for value,label in ticket.Status.choices %}
+
+                    <option
+                        value="{{ value }}"
+                        {% if value == ticket.status %}
+                        selected
+                        {% endif %}>
+
+                        {{ label }}
+
+                    </option>
+
+                {% endfor %}
+
+            </select>
+
+            <button
+                type="submit"
+                class="btn btn-primary mt-2">
+
+                Salvar
+
+            </button>
+
+        </form>
+
+        {% endif %}
 
         <div class="mb-3">
             <strong>Solicitante:</strong>

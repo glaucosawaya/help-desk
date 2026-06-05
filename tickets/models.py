@@ -91,6 +91,10 @@ class Ticket(models.Model):
         "Última Atualização",
         auto_now=True
     )
+    @property
+    def codigo(self):
+
+        return f"HD-{self.id:06d}"
 
     def __str__(self):
         return self.title

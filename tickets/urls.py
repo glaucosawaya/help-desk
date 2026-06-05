@@ -4,7 +4,10 @@ from .views import (
     TicketCreateView,
     TicketListView,
     TicketDetailView,
+    alterar_status,
+    assumir_chamado,
 )
+
 
 urlpatterns = [
 
@@ -24,5 +27,15 @@ urlpatterns = [
     "<int:pk>/",
         TicketDetailView.as_view(),
         name="ticket-detail"
-),
+    ),
+    path(
+        "<int:pk>/alterar-status/",
+        alterar_status,
+        name="ticket-change-status"
+    ),
+    path(
+        "<int:pk>/assumir/",
+        assumir_chamado,
+        name="ticket-assume"
+    ),
 ]
