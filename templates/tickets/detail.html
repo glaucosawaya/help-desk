@@ -127,6 +127,25 @@ Chamado #{{ ticket.id }}
                     </div>
 
                 </div>
+                {% if not ticket.assigned_to %}
+
+    <a
+        href="{% url 'ticket-assume' ticket.id %}"
+        class="btn btn-success w-100 mt-3">
+
+        Assumir chamado
+
+    </a>
+
+{% else %}
+
+    <div class="alert alert-info mt-3 mb-0">
+
+        Já atribuído para: <strong>{{ ticket.assigned_to }}</strong>
+
+    </div>
+
+{% endif %}
 
             </div>
 

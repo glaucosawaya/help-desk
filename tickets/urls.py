@@ -25,7 +25,7 @@ urlpatterns = [
     ),
 
     path(
-    "<int:pk>/",
+        "<int:pk>/",
         TicketDetailView.as_view(),
         name="ticket-detail"
     ),
@@ -40,8 +40,8 @@ urlpatterns = [
         name="ticket-assume"
     ),
     path(
-    "<int:pk>/comentario/",
-    adicionar_comentario,
-    name="ticket-comment"
-),
+        "<int:pk>/comentario/",
+        adicionar_comentario,
+        name="ticket-comment"
+    ),
 ]
