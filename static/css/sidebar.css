@@ -4,11 +4,13 @@ body {
 
 .app-layout {
     display: flex;
-    min-height: 100vh;
+    height: 100vh;
+    overflow: hidden;
 }
 
 .sidebar {
     width: 260px;
+
     background: #1e293b;
     color: white;
 
@@ -16,6 +18,11 @@ body {
     flex-direction: column;
 
     flex-shrink: 0;
+
+    height: 100vh;
+
+    position: sticky;
+    top: 0;
 }
 
 .sidebar-header {
@@ -31,6 +38,8 @@ body {
 .sidebar-menu {
     flex: 1;
     padding: 16px;
+
+    overflow-y: auto;
 }
 
 .sidebar-menu .nav-link {
@@ -56,9 +65,14 @@ body {
 
 .main-content {
     flex: 1;
+
     padding: 24px;
+
     background: #f8fafc;
-    overflow-x: auto;
+
+    overflow-y: auto;
+
+    height: 100vh;
 }
 .sidebar-subtitle {
     color: #94a3b8;
