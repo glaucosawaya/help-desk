@@ -1,0 +1,105 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %}
+Meu Perfil
+{% endblock %}
+
+{% block content %}
+
+<div class="row justify-content-center">
+
+
+<div class="col-lg-6">
+
+    <div class="card shadow-sm">
+
+        <div class="card-header">
+
+            <h5 class="mb-0">
+
+                Meu Perfil
+
+            </h5>
+
+        </div>
+
+        <div class="card-body">
+
+            <form method="post">
+
+                {% csrf_token %}
+
+                <div class="mb-3">
+
+                    <label class="form-label">
+                        Nome
+                    </label>
+
+                    {{ form.first_name }}
+
+                </div>
+
+                <div class="mb-3">
+
+                    <label class="form-label">
+                        Sobrenome
+                    </label>
+
+                    {{ form.last_name }}
+
+                </div>
+
+                <div class="mb-3">
+
+                    <label class="form-label">
+                        E-mail
+                    </label>
+
+                    {{ form.email }}
+
+                </div>
+
+                <div class="mb-3">
+
+                    <label class="form-label">
+                        Setor
+                    </label>
+
+                    {{ form.setor }}
+
+                </div>
+
+                <div class="mb-3">
+
+                    <label class="form-label">
+                        Telefone
+                    </label>
+
+                    {{ form.telefone }}
+
+                </div>
+
+                <div class="d-grid">
+
+                    <button
+                        type="submit"
+                        class="btn btn-primary">
+
+                        Salvar Alterações
+
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+</div>
+
+{% endblock %}

@@ -1,6 +1,6 @@
 from django import forms
-from .models import Ticket
-from .models import TicketComment
+from .models import (Ticket,
+                     TicketComment)
 
 
 class TicketForm(forms.ModelForm):
@@ -72,6 +72,7 @@ class TicketForm(forms.ModelForm):
             ),
         }
 
+
 class TicketStatusForm(forms.ModelForm):
 
     class Meta:
@@ -81,6 +82,7 @@ class TicketStatusForm(forms.ModelForm):
         fields = [
             "status"
         ]
+
 
 class TicketCommentForm(forms.ModelForm):
 
@@ -104,4 +106,23 @@ class TicketCommentForm(forms.ModelForm):
                     "placeholder": "Digite uma observação..."
                 }
             )
-        }        
+        }
+
+
+class TicketCommentForm(forms.ModelForm):
+
+    class Meta:
+
+        model = TicketComment
+
+        fields = ["comment"]
+
+        widgets = {
+            "comment": forms.Textarea(
+                attrs={
+                    "class": "form-control",
+                    "rows": 4,
+                    "placeholder": "Digite seu comentário..."
+                }
+            )
+        }

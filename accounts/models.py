@@ -28,3 +28,12 @@ class User(AbstractUser):
     criado_em = models.DateTimeField(
         auto_now_add=True
     )
+
+    @property
+    def nome_exibicao(self):
+
+        nome = (
+            f"{self.first_name} {self.last_name}"
+        ).strip()
+
+        return nome or self.username

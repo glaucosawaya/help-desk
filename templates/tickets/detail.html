@@ -46,9 +46,123 @@ Chamado #{{ ticket.id }}
 
         </div>
 
+        <!-- Histórico -->
+
+        <div class="card shadow-sm">
+
+            <div class="card-header">
+                Histórico
+            </div>
+
+            <div class="card-body">
+
+                {% for item in ticket.history.all %}
+
+                <div class="border-bottom pb-2 mb-2">
+
+                    <div>
+                        <strong>{{ item.user.nome_exibicao }}</strong>
+                    </div>
+
+                    <div class="small text-muted">
+                        {{ item.created_at|date:"d/m/Y H:i" }}
+                    </div>
+
+                    <div>
+                        {{ item.action }}
+                    </div>
+
+                </div>
+
+                {% endfor %}
+
+            </div>
+
+        </div>
+
     </div>
 
     <div class="col-lg-4">
+        {% if request.user.role == 'ADMIN' or request.user.role == 'TECNICO' %}
+        <div class="card shadow-sm mb-3">
+
+    <div class="card-header">
+
+        Ações do Chamado
+
+    </div>
+
+    <div class="card-body">
+
+        
+
+            <div class="mb-3">
+
+                <strong>Alterar Status</strong>
+
+                <form
+                    method="post"
+                    action="{% url 'ticket-change-status' ticket.id %}">
+
+                    {% csrf_token %}
+
+                    <select
+                        name="status"
+                        class="form-select mt-2">
+
+                        {% for value, label in ticket.Status.choices %}
+
+                            <option
+                                value="{{ value }}"
+                                {% if ticket.status == value %}selected{% endif %}>
+
+                                {{ label }}
+
+                            </option>
+
+                        {% endfor %}
+
+                    </select>
+
+                    <button
+                        type="submit"
+                        class="btn btn-primary w-100 mt-2">
+
+                        Salvar Status
+
+                    </button>
+
+                </form>
+
+            </div>
+
+            <hr>
+
+            {% if not ticket.assigned_to %}
+
+                <a
+                    href="{% url 'ticket-assume' ticket.id %}"
+                    class="btn btn-success w-100">
+
+                    Assumir Chamado
+
+                </a>
+
+            {% else %}
+
+                <div class="alert alert-info mb-0">
+
+                    Responsável:
+                    {{ ticket.assigned_to.nome_exibicao }}
+
+                </div>
+
+            {% endif %}
+        
+    </div>
+
+</div>
+{% endif %}
 
         <!-- Card Status -->
 
@@ -107,7 +221,7 @@ Chamado #{{ ticket.id }}
                     <strong>Solicitante</strong>
 
                     <div>
-                        {{ ticket.requester }}
+                        {{ ticket.requester.nome_exibicao }}
                     </div>
 
                 </div>
@@ -119,7 +233,7 @@ Chamado #{{ ticket.id }}
                     <div>
 
                         {% if ticket.assigned_to %}
-                        {{ ticket.assigned_to }}
+                        {{ ticket.assigned_to.nome_exibicao }}
                         {% else %}
                         Não atribuído
                         {% endif %}
@@ -127,63 +241,15 @@ Chamado #{{ ticket.id }}
                     </div>
 
                 </div>
-                {% if not ticket.assigned_to %}
-
-    <a
-        href="{% url 'ticket-assume' ticket.id %}"
-        class="btn btn-success w-100 mt-3">
-
-        Assumir chamado
-
-    </a>
-
-{% else %}
-
-    <div class="alert alert-info mt-3 mb-0">
-
-        Já atribuído para: <strong>{{ ticket.assigned_to }}</strong>
-
-    </div>
-
-{% endif %}
+                
+    
+               
 
             </div>
 
         </div>
 
-        <!-- Histórico -->
-
-        <div class="card shadow-sm">
-
-            <div class="card-header">
-                Histórico
-            </div>
-
-            <div class="card-body">
-
-                {% for item in ticket.history.all %}
-
-                <div class="border-bottom pb-2 mb-2">
-
-                    <div>
-                        <strong>{{ item.user }}</strong>
-                    </div>
-
-                    <div class="small text-muted">
-                        {{ item.created_at|date:"d/m/Y H:i" }}
-                    </div>
-
-                    <div>
-                        {{ item.action }}
-                    </div>
-
-                </div>
-
-                {% endfor %}
-
-            </div>
-
-        </div>
+        
 
 
         <!-- Comentários -->
@@ -200,7 +266,15 @@ Chamado #{{ ticket.id }}
 
                     {% csrf_token %}
 
-                    {{ comment_form }}
+                    <div class="mb-3">
+
+                        <label class="form-label">
+                            Comentário
+                        </label>
+
+                        {{ comment_form.comment }}
+
+                    </div>
 
                     <button type="submit" class="btn btn-primary mt-3">
 
@@ -217,7 +291,7 @@ Chamado #{{ ticket.id }}
                 <div class="mb-3">
 
                     <strong>
-                        {{ comment.user }}
+                        {{ comment.user.nome_exibicao }}
                     </strong>
 
                     <div class="small text-muted">

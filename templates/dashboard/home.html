@@ -177,7 +177,17 @@ Dashboard
                     </p>
 
                 {% endfor %}
+                <div class="text-end mt-3">
 
+                    <a
+                        href="{% url 'ticket-list' %}"
+                        class="btn btn-sm btn-outline-primary">
+
+                        Ver todos os chamados
+
+                    </a>
+
+                </div>
             </div>
 
         </div>
@@ -203,7 +213,7 @@ Dashboard
         <div>
 
             <strong>
-                {{ item.user }}
+                {{ item.user.nome_exibicao }}
             </strong>
 
         </div>
@@ -224,10 +234,21 @@ Dashboard
 
 {% endfor %}
 
+<div class="text-end mt-3">
+
+    <a
+        href="{% url 'ticket-list' %}"
+        class="btn btn-sm btn-outline-secondary">
+
+        Ver histórico completo
+
+    </a>
+
+</div>
             </div>
-
+            
         </div>
-
+        
     </div>
 
 </div>

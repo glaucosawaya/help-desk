@@ -18,6 +18,7 @@ from django.views.generic import DetailView
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, get_object_or_404
 from django.db.models import Count
+from django.http import Http404
 
 
 class TicketDetailView(
@@ -31,15 +32,26 @@ class TicketDetailView(
 
     context_object_name = "ticket"
 
+    def get_object(self, queryset=None):
+
+        ticket = super().get_object(queryset)
+
+        if self.request.user.role in [
+            "ADMIN",
+            "TECNICO"
+        ]:
+            return ticket
+
+        if ticket.requester == self.request.user:
+            return ticket
+
+        raise Http404()
+
     def get_context_data(self, **kwargs):
 
-        context = super().get_context_data(
-            **kwargs
-        )
+        context = super().get_context_data(**kwargs)
 
-        context["comment_form"] = (
-            TicketCommentForm()
-        )
+        context["comment_form"] = TicketCommentForm()
 
         return context
 
@@ -89,14 +101,26 @@ class TicketListView(
 
     context_object_name = "tickets"
 
-    queryset = (
-        Ticket.objects
-        .select_related(
-            "requester",
-            "assigned_to"
+    def get_queryset(self):
+
+        queryset = (
+            Ticket.objects
+            .select_related(
+                "requester",
+                "assigned_to"
+            )
+            .order_by("-created_at")
         )
-        .order_by("-created_at")
-    )
+
+        if self.request.user.role in [
+            "ADMIN",
+            "TECNICO"
+        ]:
+            return queryset
+
+        return queryset.filter(
+            requester=self.request.user
+        )
 
     def get_context_data(self, **kwargs):
 
@@ -104,33 +128,25 @@ class TicketListView(
             **kwargs
         )
 
-        context["total_tickets"] = (
-            Ticket.objects.count()
-        )
+        tickets = self.get_queryset()
 
-        context["open_count"] = (
-            Ticket.objects.filter(
-                status="OPEN"
-            ).count()
-        )
+        context["total_tickets"] = tickets.count()
 
-        context["analysis_count"] = (
-            Ticket.objects.filter(
-                status="ANALYSIS"
-            ).count()
-        )
+        context["open_count"] = tickets.filter(
+            status="OPEN"
+        ).count()
 
-        context["development_count"] = (
-            Ticket.objects.filter(
-                status="DEVELOPMENT"
-            ).count()
-        )
+        context["analysis_count"] = tickets.filter(
+            status="ANALYSIS"
+        ).count()
 
-        context["resolved_count"] = (
-            Ticket.objects.filter(
-                status="RESOLVED"
-            ).count()
-        )
+        context["development_count"] = tickets.filter(
+            status="DEVELOPMENT"
+        ).count()
+
+        context["resolved_count"] = tickets.filter(
+            status="RESOLVED"
+        ).count()
 
         return context
 

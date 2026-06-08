@@ -16,32 +16,48 @@ class DashboardView(
 
     def get_context_data(self, **kwargs):
 
-        context = super().get_context_data(**kwargs)
+        context = super().get_context_data(
+            **kwargs
+        )
 
-        context["total_tickets"] = Ticket.objects.count()
+        if self.request.user.role in [
+            "ADMIN",
+            "TECNICO"
+        ]:
 
-        context["open_tickets"] = Ticket.objects.filter(
+            tickets = Ticket.objects.all()
+
+        else:
+
+            tickets = Ticket.objects.filter(
+                requester=self.request.user
+            )
+
+        context["total_tickets"] = tickets.count()
+
+        context["open_tickets"] = tickets.filter(
             status=Ticket.Status.OPEN
         ).count()
 
-        context["analysis_tickets"] = Ticket.objects.filter(
+        context["analysis_tickets"] = tickets.filter(
             status=Ticket.Status.ANALYSIS
         ).count()
 
-        context["resolved_tickets"] = Ticket.objects.filter(
+        context["resolved_tickets"] = tickets.filter(
             status=Ticket.Status.RESOLVED
         ).count()
 
-        context["critical_tickets"] = Ticket.objects.filter(
+        context["critical_tickets"] = tickets.filter(
             priority=Ticket.Priority.CRITICAL
         ).count()
-        
-        context["ultimos_chamados"] = (Ticket.objects
+
+        context["ultimos_chamados"] = (
+            tickets
             .select_related(
                 "requester",
                 "assigned_to"
             )
-            .order_by("-created_at")[:5]
+            .order_by("-created_at")[:4]
         )
 
         context["ultimas_movimentacoes"] = (
@@ -50,7 +66,10 @@ class DashboardView(
                 "ticket",
                 "user"
             )
-            .order_by("-created_at")[:10]
+            .filter(
+                ticket__in=tickets
+            )
+            .order_by("-created_at")[:4]
         )
 
         return context

@@ -213,7 +213,7 @@ Chamados
                     </th>
 
                     <th class="text-center">
-                        Status
+                        Nome
                     </th>
 
                     <th>Sistema</th>
@@ -272,14 +272,14 @@ Chamados
 
                     <td>
 
-                        {{ ticket.requester }}
+                        {{ ticket.requester.nome_exibicao }}
 
                     </td>
 
                     <td>
 
                         {% if ticket.assigned_to %}
-                            {{ ticket.assigned_to }}
+                            {{ ticket.assigned_to.nome_exibicao }}
                         {% else %}
                             -
                         {% endif %}

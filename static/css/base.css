@@ -181,3 +181,13 @@
 #tickets-table th {
     vertical-align: middle;
 }
+.card {
+    border: none;
+    border-radius: 14px;
+}
+
+.card-header {
+    background: white;
+    border-bottom: 1px solid #e5e7eb;
+    font-weight: 600;
+}
