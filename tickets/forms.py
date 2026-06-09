@@ -3,7 +3,41 @@ from .models import (Ticket,
                      TicketComment)
 
 
+class MultipleFileInput(forms.ClearableFileInput):
+
+    allow_multiple_selected = True
+
+
+class MultipleFileField(forms.FileField):
+
+    widget = MultipleFileInput
+
+    def clean(self, data, initial=None):
+
+        if isinstance(data, (list, tuple)):
+
+            return [
+                super(MultipleFileField, self).clean(
+                    file,
+                    initial
+                )
+                for file in data
+            ]
+
+        return super().clean(data, initial)
+
+
 class TicketForm(forms.ModelForm):
+
+    anexos = MultipleFileField(
+        required=False,
+        widget=MultipleFileInput(
+            attrs={
+                "class": "form-control",
+                "accept": "image/*",
+            }
+        )
+    )
 
     class Meta:
 

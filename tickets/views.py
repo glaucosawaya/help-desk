@@ -9,6 +9,7 @@ from .models import (
     Ticket,
     TicketHistory,
     TicketComment,
+    TicketAttachment,
 )
 from .forms import (
     TicketForm,
@@ -51,7 +52,12 @@ class TicketDetailView(
 
         context = super().get_context_data(**kwargs)
 
+        comments = self.object.comments.select_related(
+            "user").order_by("created_at")
+
         context["comment_form"] = TicketCommentForm()
+        context["comments_preview"] = comments[:3]
+        context["comments_all"] = comments
 
         return context
 
@@ -73,19 +79,26 @@ class TicketCreateView(
 
     def form_valid(self, form):
 
-        form.instance.requester = (
-            self.request.user
-        )
+        form.instance.requester = self.request.user
 
-        response = super().form_valid(
-            form
-        )
+        response = super().form_valid(form)
 
         TicketHistory.objects.create(
             ticket=self.object,
             user=self.request.user,
             action="Chamado criado"
         )
+
+        arquivos = self.request.FILES.getlist(
+            "anexos"
+        )
+
+        for arquivo in arquivos:
+
+            TicketAttachment.objects.create(
+                ticket=self.object,
+                file=arquivo
+            )
 
         return response
 
@@ -219,21 +232,13 @@ def alterar_status(request, pk):
 
 
 @login_required
-def adicionar_comentario(
-    request,
-    pk
-):
+def adicionar_comentario(request, pk):
 
-    ticket = get_object_or_404(
-        Ticket,
-        pk=pk
-    )
+    ticket = get_object_or_404(Ticket, pk=pk)
 
     if request.method == "POST":
 
-        comentario = request.POST.get(
-            "comment"
-        )
+        comentario = request.POST.get("comment")
 
         if comentario:
 
@@ -246,10 +251,7 @@ def adicionar_comentario(
             TicketHistory.objects.create(
                 ticket=ticket,
                 user=request.user,
-                action="Comentário adicionado"
+                action=f"Comentário: {comentario}"
             )
 
-    return redirect(
-        "ticket-detail",
-        pk=pk
-    )
+    return redirect("ticket-detail", pk=pk)

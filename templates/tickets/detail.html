@@ -1,4 +1,5 @@
 {% extends 'layouts/base.html' %}
+{% load static %}
 
 {% block title %}
 Chamado #{{ ticket.id }}
@@ -9,7 +10,7 @@ Chamado #{{ ticket.id }}
 <div class="row">
 
     <div class="col-lg-8">
-
+            <!-- CARD DETALHES -->
         <div class="card shadow-sm mb-4">
 
             <div class="card-header">
@@ -45,38 +46,93 @@ Chamado #{{ ticket.id }}
             </div>
 
         </div>
+        <!-- Comentários -->
+        <div class="card shadow-sm mb-4">
 
-        <!-- Histórico -->
+            <div class="card-header d-flex justify-content-between align-items-center">
 
-        <div class="card shadow-sm">
+                <span>Comentários</span>
 
-            <div class="card-header">
-                Histórico
+                <button
+                    class="btn btn-sm btn-outline-primary"
+                    data-bs-toggle="modal"
+                    data-bs-target="#chatModal">
+
+                    Abrir chat completo
+                </button>
+
             </div>
 
             <div class="card-body">
 
-                {% for item in ticket.history.all %}
+                {% for comment in comments_preview %}
 
-                <div class="border-bottom pb-2 mb-2">
+                <div class="mb-3">
 
-                    <div>
-                        <strong>{{ item.user.nome_exibicao }}</strong>
-                    </div>
+                    <strong>{{ comment.user.nome_exibicao }}</strong>
 
                     <div class="small text-muted">
-                        {{ item.created_at|date:"d/m/Y H:i" }}
+                        {{ comment.created_at|date:"d/m/Y H:i" }}
                     </div>
 
                     <div>
-                        {{ item.action }}
+                        {{ comment.comment }}
                     </div>
 
                 </div>
 
+                {% empty %}
+
+                <p class="text-muted">Nenhuma conversa ainda.</p>
+
                 {% endfor %}
 
             </div>
+
+        </div>
+        <!-- Histórico -->
+        <div class="card shadow-sm">
+
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span>Histórico</span>
+
+        <button
+            type="button"
+            class="btn btn-sm btn-outline-primary"
+            data-bs-toggle="modal"
+            data-bs-target="#historicoModal">
+
+            Ver completo
+        </button>
+    </div>
+
+    <div class="card-body">
+
+        {% for item in ticket.history.all|slice:":3" %}
+
+            <div class="border-bottom pb-2 mb-2">
+
+                <div>
+                    <strong>{{ item.user.nome_exibicao }}</strong>
+                </div>
+
+                <div class="small text-muted">
+                    {{ item.created_at|date:"d/m/Y H:i" }}
+                </div>
+
+                <div>
+                    {{ item.action }}
+                </div>
+
+            </div>
+
+        {% empty %}
+
+            <p class="text-muted">Nenhum histórico.</p>
+
+        {% endfor %}
+
+    </div>
 
         </div>
 
@@ -241,74 +297,247 @@ Chamado #{{ ticket.id }}
                     </div>
 
                 </div>
-                
-    
-               
+                      
+            </div>
+
+            
+        </div>
+<!-- Card Anexos -->
+
+<div class="card shadow-sm mb-3">
+
+    <div class="card-header">
+        Anexos
+    </div>
+
+    <div class="card-body">
+
+        {% if ticket.attachments.all %}
+
+            <div class="row">
+
+                {% for anexo in ticket.attachments.all %}
+
+                    <div class="col-md-6 mb-3">
+
+                        <div class="card">
+
+                            <img
+                                src="{{ anexo.file.url }}"
+                                class="card-img-top img-anexo"
+                                style="height: 180px; object-fit: cover; cursor: pointer;"
+                                data-bs-toggle="modal"
+                                data-bs-target="#anexoModal"
+                                data-imagem="{{ anexo.file.url }}">
+
+                        </div>
+
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+        {% else %}
+
+            <p class="text-muted mb-0">
+                Nenhum anexo enviado.
+            </p>
+
+        {% endif %}
+
+    </div>
+
+</div>
+        
+
+
+        
+<!-- CHAT MODAL -->
+
+<div class="modal fade" id="chatModal" tabindex="-1">
+
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+
+        <div class="modal-content" style="height: 80vh;">
+
+            <!-- HEADER FIXO -->
+            <div class="modal-header">
+                <h5 class="modal-title">Chat do Chamado</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <!-- BODY FLEX -->
+            <div class="modal-body p-0 d-flex flex-column" style="overflow: hidden;">
+
+                <!-- CHAT AREA (SCROLL SÓ AQUI) -->
+                <div id="chat-box"
+                    class="flex-grow-1 p-3"
+                    style="overflow-y:auto; background:#f8f9fa;">
+
+                    {% for comment in comments_all %}
+
+                        {% if comment.user == request.user %}
+
+                            <!-- MINHA MENSAGEM (DIREITA) -->
+                            <div class="d-flex justify-content-end mb-3">
+
+                                <div class="bg-primary text-white p-2 rounded"
+                                     style="max-width: 70%;">
+
+                                    <small class="d-block fw-bold">Você</small>
+
+                                    {{ comment.comment }}
+
+                                    <div class="small text-white-50 text-end">
+                                        {{ comment.created_at|date:"d/m H:i" }}
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        {% else %}
+
+                            <!-- OUTRO USUÁRIO (ESQUERDA) -->
+                            <div class="d-flex justify-content-start mb-3">
+
+                                <div class="bg-light border p-2 rounded"
+                                     style="max-width: 70%;">
+
+                                    <small class="d-block fw-bold">
+                                        {{ comment.user.nome_exibicao }}
+                                    </small>
+
+                                    {{ comment.comment }}
+
+                                    <div class="small text-muted">
+                                        {{ comment.created_at|date:"d/m H:i" }}
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        {% endif %}
+
+                    {% endfor %}
+
+                </div>
+
+                <!-- INPUT FIXO (NUNCA SAI DA TELA) -->
+                <div class="border-top p-3 bg-white">
+
+                    <form method="post"
+                          action="{% url 'ticket-comment' ticket.id %}"
+                          class="d-flex gap-2">
+
+                        {% csrf_token %}
+
+                        <div class="flex-grow-1">
+                            {{ comment_form.comment }}
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">
+                            Enviar
+                        </button>
+
+                    </form>
+
+                </div>
 
             </div>
 
         </div>
 
-        
+    </div>
 
+</div>
 
-        <!-- Comentários -->
+        </div>
 
-        <div class="card shadow-sm mt-3">
+</div>
 
-            <div class="card-header">
-                Comentários
+<!-- Modal de visualização dos anexos -->
+
+<div
+    class="modal fade"
+    id="anexoModal"
+    tabindex="-1"
+    aria-hidden="true">
+
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+
+        <div class="modal-content">
+
+            <div class="modal-header">
+
+                <h5 class="modal-title">
+                    Visualização do Anexo
+                </h5>
+
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Fechar">
+                </button>
+
             </div>
 
-            <div class="card-body">
+            <div class="modal-body text-center">
 
-                <form method="post" action="{% url 'ticket-comment' ticket.id %}">
+                <img
+                    id="imagem-modal"
+                    src=""
+                    class="img-fluid rounded"
+                    alt="Anexo do chamado">
 
-                    {% csrf_token %}
+            </div>
 
-                    <div class="mb-3">
+        </div>
 
-                        <label class="form-label">
-                            Comentário
-                        </label>
+    </div>
 
-                        {{ comment_form.comment }}
+</div>
+
+<div class="modal fade" id="historicoModal" tabindex="-1" aria-hidden="true">
+
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+
+        <div class="modal-content">
+
+            <div class="modal-header">
+
+                <h5 class="modal-title">Histórico completo</h5>
+
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+
+            </div>
+
+            <div class="modal-body">
+
+                {% for item in ticket.history.all %}
+
+                    <div class="border-bottom pb-2 mb-2">
+
+                        <div>
+                            <strong>{{ item.user.nome_exibicao }}</strong>
+                        </div>
+
+                        <div class="small text-muted">
+                            {{ item.created_at|date:"d/m/Y H:i" }}
+                        </div>
+
+                        <div>
+                            {{ item.action }}
+                        </div>
 
                     </div>
-
-                    <button type="submit" class="btn btn-primary mt-3">
-
-                        Adicionar Comentário
-
-                    </button>
-
-                </form>
-
-                <hr>
-
-                {% for comment in ticket.comments.all %}
-
-                <div class="mb-3">
-
-                    <strong>
-                        {{ comment.user.nome_exibicao }}
-                    </strong>
-
-                    <div class="small text-muted">
-                        {{ comment.created_at|date:"d/m/Y H:i" }}
-                    </div>
-
-                    <div>
-                        {{ comment.comment }}
-                    </div>
-
-                </div>
 
                 {% empty %}
 
-                <p>
-                    Nenhum comentário.
-                </p>
+                    <p class="text-muted">Nenhum histórico disponível.</p>
 
                 {% endfor %}
 
@@ -320,4 +549,5 @@ Chamado #{{ ticket.id }}
 
 </div>
 
+<script src="{% static 'js/tickets/ticket-detail.js' %}"></script>
 {% endblock %}

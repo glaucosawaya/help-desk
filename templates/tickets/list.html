@@ -327,3 +327,10 @@ Chamados
 </div>
 
 {% endblock %}
+
+{% block extra_js %}
+{% load static %}
+
+<script src="{% static 'js/tickets/list.js' %}"></script>
+
+{% endblock %}

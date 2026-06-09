@@ -1,4 +1,5 @@
 {% extends 'layouts/base.html' %}
+{% load static %}
 
 {% block title %}
 Novo Chamado
@@ -8,11 +9,79 @@ Novo Chamado
 
 <h2>Novo Chamado</h2>
 
-<form method="post">
+<form method="post" enctype="multipart/form-data">
 
     {% csrf_token %}
 
-    {{ form.as_p }}
+    <div class="mb-3">
+    <label class="form-label">
+        {{ form.title.label }}
+    </label>
+    {{ form.title }}
+</div>
+
+<div class="mb-3">
+    <label class="form-label">
+        {{ form.system_name.label }}
+    </label>
+    {{ form.system_name }}
+</div>
+
+<div class="mb-3">
+    <label class="form-label">
+        {{ form.category.label }}
+    </label>
+    {{ form.category }}
+</div>
+
+<div class="mb-3">
+    <label class="form-label">
+        {{ form.priority.label }}
+    </label>
+    {{ form.priority }}
+</div>
+
+<div class="mb-3">
+    <label class="form-label">
+        {{ form.description.label }}
+    </label>
+    {{ form.description }}
+</div>
+
+<div class="mb-3">
+    <label class="form-label">
+        {{ form.error_message.label }}
+    </label>
+    {{ form.error_message }}
+</div>
+<div class="mb-3">
+
+    <label class="form-label">
+        Anexos
+    </label>
+
+    <input
+        type="file"
+        id="anexos-input"
+        name="anexos"
+        accept="image/*"
+        multiple
+        class="form-control">
+
+    <div class="form-text">
+    Clique em "Escolher arquivos" para anexar prints, fotos ou evidências.
+    Você pode repetir o processo quantas vezes quiser.
+    </div>  
+    
+    <ul
+        id="lista-anexos"
+        class="list-group mt-3">
+
+    </ul>
+    
+    
+
+</div>
 
     <button
         type="submit"
@@ -23,5 +92,10 @@ Novo Chamado
     </button>
 
 </form>
+
+{% endblock %}
+{% block extra_js %}
+
+<script src="{% static 'js/tickets/create.js' %}"></script>
 
 {% endblock %}

@@ -159,3 +159,32 @@ class TicketComment(models.Model):
     def __str__(self):
 
         return f"{self.user} - {self.ticket.codigo}"
+    
+class TicketAttachment(models.Model):
+
+    ticket = models.ForeignKey(
+        Ticket,
+        on_delete=models.CASCADE,
+        related_name="attachments"
+    )
+
+    file = models.FileField(
+        upload_to="tickets/attachments/"
+    )
+
+    uploaded_by = models.ForeignKey(
+        "accounts.User",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    def __str__(self):
+
+        return (
+            f"Anexo do {self.ticket.codigo}"
+        )    
