@@ -91,6 +91,24 @@ class Ticket(models.Model):
         "Última Atualização",
         auto_now=True
     )
+    waiting_message = models.TextField(
+        "Mensagem ao usuário",
+        blank=True,
+        null=True
+    )
+    resolved_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="resolved_tickets"
+    )
+
+    resolved_at = models.DateTimeField(
+        null=True,
+        blank=True
+    )
+
     @property
     def codigo(self):
 
@@ -98,7 +116,8 @@ class Ticket(models.Model):
 
     def __str__(self):
         return self.title
-    
+
+
 class TicketHistory(models.Model):
 
     ticket = models.ForeignKey(
@@ -129,7 +148,8 @@ class TicketHistory(models.Model):
 
     def __str__(self):
 
-        return self.action    
+        return self.action
+
 
 class TicketComment(models.Model):
 
@@ -159,7 +179,8 @@ class TicketComment(models.Model):
     def __str__(self):
 
         return f"{self.user} - {self.ticket.codigo}"
-    
+
+
 class TicketAttachment(models.Model):
 
     ticket = models.ForeignKey(
@@ -187,4 +208,37 @@ class TicketAttachment(models.Model):
 
         return (
             f"Anexo do {self.ticket.codigo}"
-        )    
+        )
+
+
+class Notification(models.Model):
+
+    recipient = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="notifications"
+    )
+
+    ticket = models.ForeignKey(
+        Ticket,
+        on_delete=models.CASCADE,
+        related_name="notifications"
+    )
+
+    message = models.CharField(
+        max_length=255
+    )
+
+    is_read = models.BooleanField(
+        default=False
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return self.message

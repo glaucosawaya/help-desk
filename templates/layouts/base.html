@@ -40,16 +40,22 @@
 
    <div class="app-layout">
 
-    {% include 'components/sidebar.html' %}
+        {% include 'components/sidebar.html' %}
 
-    <main class="main-content">
+        <div class="content-wrapper">
 
-        {% block content %}
-        {% endblock %}
+            {% include 'components/navbar.html' %}
 
-    </main>
+            <main class="main-content">
 
-</div>
+                {% block content %}
+                {% endblock %}
+
+            </main>
+
+        </div>
+
+    </div>
 
 {% block extra_js %}
 {% endblock %}

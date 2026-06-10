@@ -4,9 +4,12 @@ from .views import (
     TicketCreateView,
     TicketListView,
     TicketDetailView,
+    NotificationListView,
     alterar_status,
     assumir_chamado,
     adicionar_comentario,
+    marcar_notificacao_lida,
+    approve_resolution,
 )
 
 
@@ -43,5 +46,20 @@ urlpatterns = [
         "<int:pk>/comentario/",
         adicionar_comentario,
         name="ticket-comment"
+    ),
+    path(
+        "notifications/",
+        NotificationListView.as_view(),
+        name="notification-list",
+    ),
+    path(
+        "notifications/<int:pk>/open/",
+        marcar_notificacao_lida,
+        name="notification-open",
+    ),
+    path(
+        "<int:pk>/approve-resolution/",
+        approve_resolution,
+        name="ticket-approve-resolution"
     ),
 ]

@@ -10,6 +10,7 @@ from .models import (
     TicketHistory,
     TicketComment,
     TicketAttachment,
+    Notification,
 )
 from .forms import (
     TicketForm,
@@ -20,6 +21,8 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, get_object_or_404
 from django.db.models import Count
 from django.http import Http404
+from django.http import JsonResponse
+from django.utils import timezone
 
 
 class TicketDetailView(
@@ -211,13 +214,57 @@ def alterar_status(request, pk):
 
     if request.method == "POST":
 
-        novo_status = request.POST.get(
-            "status"
-        )
+        novo_status = request.POST.get("status")
+        mensagem = request.POST.get("waiting_message")
 
         ticket.status = novo_status
 
+        if novo_status == Ticket.Status.WAITING_USER:
+            ticket.waiting_message = mensagem
+        else:
+            ticket.waiting_message = None
+
+        if novo_status == Ticket.Status.RESOLVED:
+
+            ticket.resolved_by = request.user
+            ticket.resolved_at = timezone.now()
+
+            Notification.objects.create(
+                recipient=ticket.requester,
+                ticket=ticket,
+                message=(
+                    f"Seu chamado {ticket.codigo} foi resolvido. "
+                    "Clique para aprovar ou rejeitar a solução."
+                )
+            )
+
         ticket.save()
+
+    if novo_status == Ticket.Status.WAITING_USER and mensagem:
+
+        Notification.objects.create(
+            recipient=ticket.requester,
+            ticket=ticket,
+            message="O técnico solicitou mais informações."
+        )
+
+        TicketHistory.objects.create(
+            ticket=ticket,
+            user=request.user,
+            action=f"Aguardando usuário: {mensagem}"
+        )
+
+    else:
+
+        Notification.objects.create(
+            recipient=ticket.requester,
+            ticket=ticket,
+            message=(
+                f"Seu chamado {ticket.codigo} "
+                f"foi atualizado para "
+                f"{ticket.get_status_display()}."
+            )
+        )
 
         TicketHistory.objects.create(
             ticket=ticket,
@@ -253,5 +300,111 @@ def adicionar_comentario(request, pk):
                 user=request.user,
                 action=f"Comentário: {comentario}"
             )
+            if (
+                request.user == ticket.requester
+                and ticket.status == Ticket.Status.WAITING_USER
+                and ticket.assigned_to
+            ):
+
+                Notification.objects.create(
+                    recipient=ticket.assigned_to,
+                    ticket=ticket,
+                    message=(
+                        f"{request.user.nome_exibicao} "
+                        f"respondeu ao chamado {ticket.codigo}."
+                    )
+                )
+
+                TicketHistory.objects.create(
+                    ticket=ticket,
+                    user=request.user,
+                    action="Usuário respondeu à solicitação do técnico."
+                )
+
+    if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+
+        return JsonResponse({
+            "success": True,
+            "user": request.user.nome_exibicao,
+            "comment": comentario,
+            "created_at": timezone.localtime().strftime("%d/%m %H:%M"),
+        })
+
+    return redirect(
+        "ticket-detail",
+        pk=pk
+    )
+
+
+class NotificationListView(LoginRequiredMixin, ListView):
+
+    model = Notification
+
+    template_name = "tickets/notifications.html"
+
+    context_object_name = "notifications"
+
+    paginate_by = 20
+
+    def get_queryset(self):
+
+        return Notification.objects.filter(
+            recipient=self.request.user
+        ).select_related(
+            "ticket"
+        )
+
+
+@login_required
+def marcar_notificacao_lida(request, pk):
+
+    notification = get_object_or_404(
+        Notification,
+        pk=pk,
+        recipient=request.user
+    )
+
+    notification.is_read = True
+    notification.save()
+
+    return redirect(
+        "ticket-detail",
+        pk=notification.ticket.id
+    )
+
+
+@login_required
+def approve_resolution(request, pk):
+
+    ticket = get_object_or_404(Ticket, pk=pk)
+
+    if request.user != ticket.requester:
+        return redirect("ticket-detail", pk=pk)
+
+    if request.method == "POST":
+
+        action = request.POST.get("action")
+
+        if action == "confirm":
+
+            ticket.status = Ticket.Status.CLOSED
+
+            TicketHistory.objects.create(
+                ticket=ticket,
+                user=request.user,
+                action="Resolução aprovada pelo usuário"
+            )
+
+        elif action == "reject":
+
+            ticket.status = Ticket.Status.DEVELOPMENT
+
+            TicketHistory.objects.create(
+                ticket=ticket,
+                user=request.user,
+                action="Resolução rejeitada pelo usuário"
+            )
+
+        ticket.save()
 
     return redirect("ticket-detail", pk=pk)

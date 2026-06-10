@@ -1,20 +1,107 @@
-<nav class="navbar navbar-dark bg-dark">
+<nav class="navbar navbar-expand-lg bg-white border-bottom px-4 py-3 shadow-sm">
 
     <div class="container-fluid">
 
-        <span class="navbar-brand">
-            Help Desk
-        </span>
+        <!-- Título -->
+        <div>
+            <h5 class="mb-0">
+                Help Desk
+            </h5>
+        </div>
 
-        {% if user.is_authenticated %}
+        <!-- Lado direito -->
+        <div class="d-flex align-items-center gap-4">
+            
+            <!-- Notificações -->
+        <div class="dropdown">
 
-        <span class="text-white">
+            <button
+                class="btn position-relative"
+                data-bs-toggle="dropdown"
+                aria-expanded="false">
 
-            {{ user.nome_exibicao }}
+                <i class="bi bi-bell fs-5"></i>
 
-        </span>
+                {% if unread_notifications_count > 0 %}
 
-        {% endif %}
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+
+                        {{ unread_notifications_count }}
+
+                    </span>
+
+                {% endif %}
+
+            </button>
+
+            <div class="dropdown-menu dropdown-menu-end shadow"
+                style="width: 350px;">
+
+                <div class="px-3 py-2 border-bottom">
+
+                    <strong>Notificações</strong>
+
+                </div>
+
+                {% for notification in recent_notifications %}
+
+                   <a href="{% url 'notification-open' notification.id %}"
+                      class="dropdown-item py-3">
+                    
+
+                        <div class="fw-semibold text-wrap" style="white-space: normal;">
+                            {{ notification.message }}
+                        </div>
+
+                        <small class="text-muted">
+
+                            {{ notification.ticket.codigo }}
+                            •
+                            {{ notification.created_at|timesince }} atrás
+
+                        </small>
+
+                    </a>
+
+                {% empty %}
+
+                    <div class="px-3 py-3 text-muted text-center">
+
+                        Você não possui notificações.
+
+                    </div>
+
+                {% endfor %}
+
+                <div class="border-top">
+
+                    <a href="{% url 'notification-list' %}"
+                    class="dropdown-item text-center fw-semibold py-2">
+
+                        Ver todas →
+
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+            <!-- Usuário -->
+            <div class="text-end">
+
+                <div class="fw-semibold">
+                    {{ request.user.nome_exibicao }}
+                </div>
+
+                <small class="text-muted">
+                    {{ request.user.get_role_display }}
+                </small>
+
+            </div>
+
+        </div>
 
     </div>
 

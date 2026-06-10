@@ -15,10 +15,74 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 document.addEventListener("DOMContentLoaded", function () {
 
-    const chatBox = document.getElementById("chat-box");
+    const chatModal = document.getElementById("chatModal");
 
-    if (chatBox) {
-        chatBox.scrollTop = chatBox.scrollHeight;
+    if (chatModal) {
+
+        chatModal.addEventListener("shown.bs.modal", function () {
+
+            const chatBox = document.getElementById("chat-box");
+
+            if (chatBox) {
+                chatBox.scrollTop = chatBox.scrollHeight;
+            }
+
+        });
+
     }
 
 });
+
+const chatForm = document.getElementById("chat-form");
+
+if (chatForm) {
+
+    chatForm.addEventListener("submit", function (e) {
+
+        e.preventDefault();
+
+        const formData = new FormData(chatForm);
+
+        fetch(chatForm.action, {
+            method: "POST",
+            body: formData,
+            headers: {
+                "X-Requested-With": "XMLHttpRequest"
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+
+            if (data.success) {
+
+                const chatBox = document.getElementById("chat-box");
+
+                chatBox.insertAdjacentHTML("beforeend", `
+                    <div class="d-flex justify-content-end mb-3">
+                        <div class="bg-primary text-white p-2 rounded"
+                             style="max-width:70%;">
+
+                            <small class="d-block fw-bold">
+                                Você
+                            </small>
+
+                            ${data.comment}
+
+                            <div class="small text-white-50 text-end">
+                                ${data.created_at}
+                            </div>
+
+                        </div>
+                    </div>
+                `);
+
+                chatForm.reset();
+
+                chatBox.scrollTop = chatBox.scrollHeight;
+            }
+
+        });
+
+    });
+
+}

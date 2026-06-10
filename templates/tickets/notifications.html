@@ -1,0 +1,58 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %}
+Notificações
+{% endblock %}
+
+{% block content %}
+
+<div class="card shadow-sm">
+
+    <div class="card-header">
+
+        <h4 class="mb-0">
+            Notificações
+        </h4>
+
+    </div>
+
+    <div class="card-body">
+
+        {% for notification in notifications %}
+
+            <div class="border-bottom py-3">
+
+                <div class="fw-semibold">
+
+                    {{ notification.message }}
+
+                </div>
+
+                <div class="small text-muted">
+
+                    Chamado:
+                    {{ notification.ticket.codigo }}
+
+                    •
+
+                    {{ notification.created_at|date:"d/m/Y H:i" }}
+
+                </div>
+
+            </div>
+
+        {% empty %}
+
+            <p class="text-muted mb-0">
+
+                Você não possui notificações.
+
+            </p>
+
+        {% endfor %}
+
+    </div>
+
+</div>
+
+{% endblock %}
