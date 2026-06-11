@@ -86,3 +86,29 @@ if (chatForm) {
     });
 
 }
+document.addEventListener("DOMContentLoaded", function () {
+
+    const statusSelect = document.getElementById("status-select");
+    const waitingContainer = document.getElementById("waiting-message-container");
+
+    if (statusSelect && waitingContainer) {
+
+        function toggleWaitingMessage() {
+
+            if (statusSelect.value === "WAITING_USER") {
+
+                waitingContainer.style.display = "block";
+
+            } else {
+
+                waitingContainer.style.display = "none";
+
+            }
+        }
+
+        toggleWaitingMessage();
+
+        statusSelect.addEventListener("change", toggleWaitingMessage);
+    }
+
+});

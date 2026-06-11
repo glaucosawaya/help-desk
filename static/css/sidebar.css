@@ -88,3 +88,31 @@ body {
     font-size: 0.85rem;
     color: #94a3b8;
 }
+.sidebar .collapse .nav-link {
+    font-size: 0.9rem;
+    padding: 0.45rem 1rem;
+    opacity: 0.9;
+}
+
+.sidebar .collapse .nav-link:hover {
+    opacity: 1;
+}
+
+.sidebar .bi-chevron-down {
+    font-size: 0.8rem;
+}
+.sidebar .collapse .nav-link.active {
+    font-weight: 600;
+    color: #fff;
+    background-color: rgba(255, 255, 255, 0.12);
+    border-radius: 6px;
+}
+.sidebar .nav-link.active{
+    background-color: rgba(255,255,255,.18);
+    color: #ffffff;
+    font-weight: 600;
+}
+
+.sidebar .nav-link.active i{
+    color: #ffffff;
+}

@@ -78,6 +78,39 @@ Chamado #{{ ticket.id }}
 
 {% endif %}
 
+        {% if ticket.status == 'RESOLVED' %}
+
+<div class="alert alert-warning mb-4">
+
+    <h6 class="mb-2">
+        <i class="bi bi-hourglass-split"></i>
+        Chamado aguardando aprovação
+    </h6>
+
+    <p class="mb-0">
+        Este chamado foi marcado como resolvido e aguarda a confirmação do solicitante.
+    </p>
+
+</div>
+
+{% endif %}
+{% if ticket.status == 'CLOSED' %}
+
+<div class="alert alert-secondary mb-4">
+
+    <h6 class="mb-2">
+        <i class="bi bi-lock-fill"></i>
+        Chamado encerrado
+    </h6>
+
+    <p class="mb-0">
+        Este chamado está encerrado e disponível apenas para consulta.
+    </p>
+
+</div>
+
+{% endif %}
+
         <!-- Comentários -->
         <div class="card shadow-sm mb-4">
 
@@ -514,27 +547,49 @@ Chamado #{{ ticket.id }}
 
                 </div>
 
-                <!-- INPUT FIXO (NUNCA SAI DA TELA) -->
-                <div class="border-top p-3 bg-white">
+                <!-- INPUT FIXO -->
+<div class="border-top p-3 bg-white">
 
-                    <form id="chat-form"
-                        method="post"
-                        action="{% url 'ticket-comment' ticket.id %}"
-                        class="d-flex gap-2">
+    {% if ticket.status != 'RESOLVED' and ticket.status != 'CLOSED' %}
 
-                        {% csrf_token %}
+        <form id="chat-form"
+              method="post"
+              action="{% url 'ticket-comment' ticket.id %}"
+              class="d-flex gap-2">
 
-                        <div class="flex-grow-1">
-                            {{ comment_form.comment|safe }}
-                        </div>
+            {% csrf_token %}
 
-                        <button type="submit" class="btn btn-primary">
-                            Enviar
-                        </button>
+            <div class="flex-grow-1">
+                {{ comment_form.comment|safe }}
+            </div>
 
-                    </form>
+            <button type="submit" class="btn btn-primary">
+                Enviar
+            </button>
 
-                </div>
+        </form>
+
+    {% else %}
+
+        <div class="alert alert-light mb-0">
+
+            <i class="bi bi-lock-fill"></i>
+
+            {% if ticket.status == 'RESOLVED' %}
+
+                O chat está bloqueado enquanto o solicitante avalia a solução apresentada.
+
+            {% else %}
+
+                O chat está indisponível porque este chamado foi encerrado.
+
+            {% endif %}
+
+        </div>
+
+    {% endif %}
+
+</div>
 
             </div>
 
@@ -638,32 +693,6 @@ Chamado #{{ ticket.id }}
     </div>
 
 </div>
-<script>
 
-document.addEventListener("DOMContentLoaded", function () {
-
-    const statusSelect = document.getElementById("status-select");
-    const waitingContainer = document.getElementById("waiting-message-container");
-
-    function toggleWaitingMessage() {
-
-        if (statusSelect.value === "WAITING_USER") {
-
-            waitingContainer.style.display = "block";
-
-        } else {
-
-            waitingContainer.style.display = "none";
-
-        }
-    }
-
-    toggleWaitingMessage();
-
-    statusSelect.addEventListener("change", toggleWaitingMessage);
-
-});
-
-</script>
 <script src="{% static 'js/tickets/ticket-detail.js' %}"></script>
 {% endblock %}

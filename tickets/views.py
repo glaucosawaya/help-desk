@@ -282,6 +282,14 @@ def alterar_status(request, pk):
 def adicionar_comentario(request, pk):
 
     ticket = get_object_or_404(Ticket, pk=pk)
+    if ticket.status in [
+        Ticket.Status.RESOLVED,
+        Ticket.Status.CLOSED,
+    ]:
+        return redirect(
+            "ticket-detail",
+            pk=ticket.pk
+        )
 
     if request.method == "POST":
 
