@@ -1,5 +1,22 @@
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import (
+    AbstractUser,
+    UserManager,
+)
 from django.db import models
+
+
+class CustomUserManager(UserManager):
+
+    def create_superuser(self, username, email=None, password=None, **extra_fields):
+
+        extra_fields.setdefault("role", User.Role.ADMIN)
+
+        return super().create_superuser(
+            username=username,
+            email=email,
+            password=password,
+            **extra_fields
+        )
 
 
 class User(AbstractUser):
@@ -28,6 +45,7 @@ class User(AbstractUser):
     criado_em = models.DateTimeField(
         auto_now_add=True
     )
+    objects = CustomUserManager()
 
     @property
     def nome_exibicao(self):
